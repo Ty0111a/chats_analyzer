@@ -5,10 +5,27 @@ import json
 import os
 import sys
 import tempfile
-
+import io
 import streamlit as st
 
 video_path = "instruction.mp4"
+
+predefined_plugin_paths = [
+    "hourly_activity.py",
+    "messages_counter.py",
+    "radio_silence.py",
+    "reactions_per_user.py",
+    "reply_network.py"
+]
+
+def create_uploaded_file_from_path(path):
+    with open(path, "rb") as f:
+        content = f.read()
+    # Создаем объект BytesIO для имитации файла
+    bytes_io = io.BytesIO(content)
+    # streamlit ожидает UploadedFile с атрибутом name
+    bytes_io.name = os.path.basename(path)
+    return bytes_io
 
 st.set_page_config(page_title="Анализатор чатов", layout="wide")
 
@@ -33,6 +50,10 @@ with st.sidebar.expander("Плагины"):
     )
     if uploaded_plugins and not isinstance(uploaded_plugins, list):
         uploaded_plugins = [uploaded_plugins]
+
+for path in predefined_plugin_paths:
+        if os.path.exists(path):
+            uploaded_plugins.append(create_uploaded_file_from_path(path))
 
 st.sidebar.title("Диалоги для анализа")
 selected_file = None
